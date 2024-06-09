@@ -26,7 +26,7 @@ static VERSION_UPDATE: &str = "0.11.15";
 type BlockHandle = JoinHandle<Result<(), PollSendError<KaspadMessage>>>;
 
 #[allow(dead_code)]
-pub struct KaspadHandler {
+pub struct ApaskdHandler {
     client: RpcClient<TonicChannel>,
     pub send_channel: Sender<KaspadMessage>,
     stream: Streaming<KaspadMessage>,
@@ -41,7 +41,7 @@ pub struct KaspadHandler {
 }
 
 #[async_trait(?Send)]
-impl Client for KaspadHandler {
+impl Client for ApaskdHandler {
     fn add_devfund(&mut self, address: String, percent: u16) {
         self.devfund_address = Some(address);
         self.devfund_percent = percent;
@@ -56,7 +56,7 @@ impl Client for KaspadHandler {
         while let Some(msg) = self.stream.message().await? {
             match msg.payload {
                 Some(payload) => self.handle_message(payload, miner).await?,
-                None => warn!("kaspad message payload is empty"),
+                None => warn!("apsakd message payload is empty"),
             }
         }
         Ok(())
@@ -67,7 +67,7 @@ impl Client for KaspadHandler {
     }
 }
 
-impl KaspadHandler {
+impl ApaskdHandler {
     pub async fn connect<D>(
         address: D,
         miner_address: String,
@@ -158,10 +158,10 @@ impl KaspadHandler {
                 }
             }
             Payload::GetInfoResponse(info) => {
-                info!("Kaspad version: {}", info.server_version);
-                let kaspad_version = Version::parse(&info.server_version)?;
+                info!("apsaKd version: {}", info.server_version);
+                let apsakd_version = Version::parse(&info.server_version)?;
                 let update_version = Version::parse(VERSION_UPDATE)?;
-                match kaspad_version >= update_version {
+                match apsakd_version >= update_version {
                     true => self.client_send(NotifyNewBlockTemplateRequestMessage {}).await?,
                     false => self.client_send(NotifyBlockAddedRequestMessage {}).await?,
                 };
@@ -173,7 +173,7 @@ impl KaspadHandler {
                 Some(e) => error!("Failed registering for new template notifications: {:?}", e),
             },
             Payload::NotifyBlockAddedResponse(res) => match res.error {
-                None => info!("Registered for block notifications (upgrade your Kaspad for better experience)"),
+                None => info!("Registered for block notifications (upgrade your apsaKd for better experience)"),
                 Some(e) => error!("Failed registering for block notifications: {:?}", e),
             },
             msg => info!("got unknown msg: {:?}", msg),
@@ -182,7 +182,7 @@ impl KaspadHandler {
     }
 }
 
-impl Drop for KaspadHandler {
+impl Drop for ApaskdHandler {
     fn drop(&mut self) {
         self.block_handle.abort();
     }

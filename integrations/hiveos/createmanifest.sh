@@ -1,7 +1,7 @@
 ####################################################################################
 ###
-### kaspa-miner
-### https://github.com/tmrlvi/kaspa-miner/releases
+### apsak-miner
+### https://github.com/tmrlvi/apsak-miner/releases
 ###
 ### Hive integration: Merlin
 ###
@@ -15,15 +15,15 @@ fi
 cat > h-manifest.conf << EOF
 ####################################################################################
 ###
-### kaspa-miner
-### https://github.com/tmrlvi/kaspa-miner/releases
+### apsak-miner
+### https://github.com/tmrlvi/apsak-miner/releases
 ###
 ### Hive integration: Merlin
 ###
 ####################################################################################
 
 # The name of the miner
-CUSTOM_NAME=kaspa-miner
+CUSTOM_NAME=apsak-miner
 
 # Optional version of your custom miner package
 CUSTOM_VERSION=$1

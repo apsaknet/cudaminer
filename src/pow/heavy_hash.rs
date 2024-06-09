@@ -100,6 +100,7 @@ impl Matrix {
 
     pub fn heavy_hash(&self, hash: Hash) -> Hash {
         let hash = hash.to_le_bytes();
+        let hash: [u8; 32] = hash.iter().rev().cloned().collect::<Vec<u8>>().try_into().unwrap();
         // SAFETY: An uninitialized MaybrUninit is always safe.
         let mut vec: [MaybeUninit<u8>; 64] = unsafe { MaybeUninit::uninit().assume_init() };
         for i in 0..32 {
@@ -122,7 +123,8 @@ impl Matrix {
 
         // Concatenate 4 LSBs back to 8 bit xor with sum1
         product.iter_mut().zip(hash).for_each(|(p, h)| *p ^= h);
-        HeavyHasher::hash(Hash::from_le_bytes(product))
+        let res: [u8; 32] = product.iter().rev().cloned().collect::<Vec<u8>>().try_into().unwrap();
+        HeavyHasher::hash(Hash::from_le_bytes(res))
     }
 }
 

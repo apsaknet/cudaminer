@@ -107,32 +107,32 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p kaspa-miner
+          args: -p apsak-miner
 
       - name: Run cargo test no asm
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p kaspa-miner --features=no-asm
+          args: -p apsak-miner --features=no-asm
 
 
       - name: Run cargo test no parking_lot
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p kaspa-miner --no-default-features
+          args: -p apsak-miner --no-default-features
 
       - name: Run cargo test shuttle
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p kaspa-miner --no-default-features --features=shuttle
+          args: -p apsak-miner --no-default-features --features=shuttle
 
-      - name: Run cargo test for kaspaopencl
+      - name: Run cargo test for apsakopencl
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p kaspaopencl
+          args: -p apsakopencl
 
 
   test-release:
@@ -197,31 +197,31 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --release -p kaspa-miner
+          args: --release -p apsak-miner
 
       - name: Run cargo test release no asm
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --features=no-asm --release -p kaspa-miner
+          args: --features=no-asm --release -p apsak-miner
 
       - name: Run cargo test release no parking_lot
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --no-default-features --release -p kaspa-miner
+          args: --no-default-features --release -p apsak-miner
 
       - name: Run cargo test release shuttle
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --no-default-features --features=shuttle --release -p kaspa-miner
+          args: --no-default-features --features=shuttle --release -p apsak-miner
 
-      - name: Run cargo test for kaspaopencl
+      - name: Run cargo test for apsakopencl
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --release -p kaspaopencl
+          args: --release -p apsakopencl
 
   lints:
     name: Lints

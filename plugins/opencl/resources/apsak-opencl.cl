@@ -17,16 +17,6 @@ typedef int int32_t;
 typedef ulong uint64_t;
 typedef long int64_t;
 
-/* TINY KECCAK */
-/** libkeccak-tiny
- *
- * A single-file implementation of SHA-3 and SHAKE.
- *
- * Implementor: David Leon Gil
- * License: CC0, attribution kindly requested. Blame taken too,
- * but not liability.
- */
-
 /******** The Keccak-f[1600] permutation ********/
 
 /*** Constants. ***/
@@ -186,29 +176,6 @@ STATIC inline void hash(constant const ulong *initP, const ulong* in, ulong4* ou
   *out = ((ulong4 *)(a))[0];
 }
 
-/* RANDOM NUMBER GENERATOR BASED ON MWC64X                          */
-/* http://cas.ee.ic.ac.uk/people/dt10/research/rngs-gpu-mwc64x.html */
-
-/*  Written in 2018 by David Blackman and Sebastiano Vigna (vigna@acm.org)
-
-To the extent possible under law, the author has dedicated all copyright
-and related and neighboring rights to this software to the public domain
-worldwide. This software is distributed without any warranty.
-
-See <http://creativecommons.org/publicdomain/zero/1.0/>. */
-
-
-/* This is xoshiro256** 1.0, one of our all-purpose, rock-solid
-   generators. It has excellent (sub-ns) speed, a state (256 bits) that is
-   large enough for any parallel application, and it passes all tests we
-   are aware of.
-
-   For generating just floating-point numbers, xoshiro256+ is even faster.
-
-   The state must be seeded so that it is not everywhere zero. If you have
-   a 64-bit seed, we suggest to seed a splitmix64 generator and use its
-   output to fill s. */
-
 inline uint64_t rotl(const uint64_t x, int k) {
 	return (x << k) | (x >> (64 - k));
 }
@@ -265,7 +232,7 @@ void STATIC inline _amul4bit(__constant uint32_t packed_vec1[32], uint32_t packe
     }
     *ret = res;
 }
-#elif (defined(OFFLINE) && (defined(__gfx906__) || defined(__gfx908__))) || defined(__gfx1011__) || defined(__gfx1012__) || defined(__gfx1030__) || defined(__gfx1031__) || defined(__gfx1032__) || defined(__gfx1034__)
+#elif (defined(OFFLINE) && (defined(__gfx1010__) || defined(__gfx1011__))) || defined(__gfx1012__) || defined(__gfx1030__) || defined(__gfx1031__) || defined(__gfx1032__) || defined(__gfx1034__) || defined(__gfx1035__) || defined(__gfx1036__) || defined(__gfx1037__)
 #define amul4bit(X,Y,Z) _amul4bit((constant uint32_t*)(X), (private uint32_t*)(Y), (uint32_t *)(Z))
 void STATIC inline _amul4bit(__constant uint32_t packed_vec1[32], uint32_t packed_vec2[32], uint32_t *ret) {
     // We assume each 32 bits have four values: A0 B0 C0 D0
@@ -339,7 +306,6 @@ kernel void heavy_hash(
     private uint64_t nonce;
     switch (random_type){
       case RANDOM_TYPE_LEAN:
-        // nonce = ((uint64_t *)random_state)[0] + nonceId;
         nonce = (((__global uint64_t *)random_state)[0]) ^ nonceId;
         break;
       case RANDOM_TYPE_XOSHIRO:
@@ -358,6 +324,11 @@ kernel void heavy_hash(
 
     Hash hash_, hash2_;
     hash(powP, (const ulong*)buffer, &hash_.hash);
+    for (int i = 0; i < 16; i++) {
+        uchar temp = hash_.bytes[i];
+        hash_.bytes[i] = hash_.bytes[31 - i];
+        hash_.bytes[31 - i] = temp;
+    }
     #if __FORCE_AMD_V_DOT8_U32_U4__ == 1
     #else
     private uchar hash_part[64];
@@ -384,8 +355,12 @@ kernel void heavy_hash(
     #endif
         product1 >>= 10;
         product2 >>= 10;
-//        hash2_.bytes[rowId] = hash_.bytes[rowId] ^ bitselect(product1, product2, 0x0000000FU);
         hash2_.bytes[rowId] = hash_.bytes[rowId] ^ ((uint8_t)((product1 << 4) | (uint8_t)(product2)));
+    }
+    for (int i = 0; i < 16; i++) {
+        uchar temp = hash2_.bytes[i];
+        hash2_.bytes[i] = hash2_.bytes[31 - i];
+        hash2_.bytes[31 - i] = temp;
     }
     buffer[0] = hash2_.hash.x;
     buffer[1] = hash2_.hash.y;
@@ -397,19 +372,12 @@ kernel void heavy_hash(
     hash(heavyP, (const ulong*)buffer, &hash_.hash);
 
     if (LT_U256(hash_.hash, target)){
-        //printf("%lu: %lu < %lu: %d %d\n", nonce, ((uint64_t *)hash_)[3], target[3], ((uint64_t *)hash_)[3] < target[3], LT_U256((uint64_t *)hash_, target));
         #ifdef cl_khr_int64_base_atomics
         atom_cmpxchg(final_nonce, 0, nonce);
         #else
         if (!atom_cmpxchg(&lock, 0, 1)) {
             *final_nonce = nonce;
-            //for(int i=0;i<4;i++) final_hash[i] = ((uint64_t volatile *)hash_)[i];
         }
         #endif
     }
-    /*if (nonceId==1) {
-        //printf("%lu: %lu < %lu: %d %d\n", nonce, ((uint64_t *)hash2_)[3], target[3], ((uint64_t *)hash_)[3] < target[3]);
-        *final_nonce = nonce;
-        for(int i=0;i<4;i++) final_hash[i] = ((uint64_t volatile *)hash_)[i];
-    }*/
 }

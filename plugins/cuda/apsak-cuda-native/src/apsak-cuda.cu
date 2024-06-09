@@ -79,6 +79,11 @@ extern "C" {
             uint256_t hash_;
             memcpy(input +  HASH_HEADER_SIZE, (uint8_t *)(&nonce), 8);
             hash(powP, hash_.hash, input);
+            for (int i = 0; i < 16; i++) {
+                            uint8_t temp = hash_.hash[i];
+                            hash_.hash[i] = hash_.hash[31 - i];
+                            hash_.hash[31 - i] = temp;
+                        }
 
             //assert((rowId != 0) || (hashId != 0) );
             uchar4 packed_hash[QUARTER_MATRIX_SIZE] = {0};
@@ -108,6 +113,12 @@ extern "C" {
                 hash_.hash[rowId] = lop_temp;
                 #endif
             }
+            for (int i = 0; i < 16; i++) {
+                uint8_t temp = hash_.hash[i];
+                hash_.hash[i] = hash_.hash[31 - i];
+                hash_.hash[31 - i] = temp;
+            }
+
             memset(input, 0, 80);
             memcpy(input, hash_.hash, 32);
             hash(heavyP, hash_.hash, input);
