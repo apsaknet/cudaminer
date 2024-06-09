@@ -172,7 +172,7 @@ impl<'gpu> CudaGPUWorker<'gpu> {
                 e
             })?);
         } else if major >= 8 || (major == 8 && minor == 9) {
-            _module = Arc::new(Module::from_ptx(PTX_89, &[ModuleJitOption::OptLevel(OptLevel::O4)]).map_err(|e| {
+            _module = Arc::new(Module::from_ptx(PTX_86, &[ModuleJitOption::OptLevel(OptLevel::O4)]).map_err(|e| {
                 error!("Error loading PTX. Make sure you have the updated driver for you devices");
                 e
             })?);
