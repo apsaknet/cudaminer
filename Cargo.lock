@@ -52,7 +52,7 @@ dependencies = [
 
 [[package]]
 name = "apsak-miner"
-version = "0.2.1-GPU-0.7"
+version = "0.7.2"
 dependencies = [
  "async-trait",
  "blake2b_simd",

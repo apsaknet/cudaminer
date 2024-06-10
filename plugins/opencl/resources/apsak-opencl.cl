@@ -323,6 +323,11 @@ kernel void heavy_hash(
     buffer[9] = nonce;
 
     Hash hash_, hash2_;
+    for (int i = 0; i < 16; i++) {
+        uchar temp = buffer[i];
+        buffer[i] = buffer[31 - i];
+        buffer[31 - i] = temp;
+    }
     hash(powP, (const ulong*)buffer, &hash_.hash);
     for (int i = 0; i < 16; i++) {
         uchar temp = hash_.bytes[i];
@@ -368,7 +373,6 @@ kernel void heavy_hash(
     buffer[3] = hash2_.hash.w;
     #pragma unroll
     for(int i=4; i<10; i++) buffer[i] = 0;
-
     hash(heavyP, (const ulong*)buffer, &hash_.hash);
 
     if (LT_U256(hash_.hash, target)){

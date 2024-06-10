@@ -1,10 +1,10 @@
 [package]
 name = "apsak-miner"
-version = "0.2.1-GPU-0.7"
+version = "0.7.2"
 edition = "2021"
 license = "MIT/Apache-2.0"
 authors = ["Elichai <elichai.turkel@gmail.com>"]
-repository = "https://github.com/tmrlvi/apsak-miner"
+repository = "https://github.com/apsaknet/gpuminer"
 readme = "README.md"
 description = "A fast CPU & GPU miner for apsaK"
 categories = ["command-line-utilities"]
