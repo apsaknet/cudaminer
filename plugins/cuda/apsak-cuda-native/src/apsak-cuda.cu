@@ -105,13 +105,17 @@ extern "C" {
                 product1 >>= 6;
                 product1 &= 0xF0;
                 product2 >>= 10;
-                #if __CUDA_ARCH__ < 500 || __CUDA_ARCH__ > 700
+                #if __CUDA_ARCH__ < 500 || (__CUDA_ARCH__ > 700 && __CUDA_ARCH__ < 890)
                 hash_.hash[rowId] = hash_.hash[rowId] ^ ((uint8_t)(product1) | (uint8_t)(product2));
-                #else
+                #elif __CUDA_ARCH__ < 890
                 uint32_t lop_temp = hash_.hash[rowId];
                 asm("lop3.b32" " %0, %1, %2, %3, 0x56;": "=r" (lop_temp): "r" (product1), "r" (product2), "r" (lop_temp));
                 hash_.hash[rowId] = lop_temp;
+                #else
+                //TODO ARCH 890
+                hash_.hash[rowId] = hash_.hash[rowId] ^ ((uint8_t)(product1) | (uint8_t)(product2));
                 #endif
+
             }
             for (int i = 0; i < 16; i++) {
                 uint8_t temp = hash_.hash[i];
